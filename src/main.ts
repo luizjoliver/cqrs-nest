@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { existsSync, unlinkSync } from 'fs';
 import { AppService } from './app.service';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   // Para Desenvolvimento , verificação e deleção DB
@@ -9,10 +10,12 @@ async function bootstrap() {
   if (existsSync(dbFile)) unlinkSync(dbFile);
 
   const app = await NestFactory.create(AppModule);
+  app.useGlobalPipes(new ValidationPipe());
 
   const appService = app.get(AppService);
   await appService.seed();
 
   await app.listen(process.env.PORT ?? 3000);
 }
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 bootstrap();
