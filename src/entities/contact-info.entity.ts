@@ -4,11 +4,11 @@ import { Employee } from './employee.entity';
 @Entity()
 export class ContactInfo {
   @PrimaryColumn()
-  @JoinColumn()
   employeeId: number;
   @OneToOne(() => Employee)
+  @JoinColumn()
   employee: Employee;
-  @Column()
+  @Column({ nullable: true })
   phone: string;
   @Column()
   email: string;
