@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   NotFoundException,
+  Put,
 } from '@nestjs/common';
 import { CreateEmployeeDto } from './commands/create-employee/create-employee.dto';
 import { UpdateEmployeeDto } from './commands/update-employee/update-employee.dto';
@@ -15,6 +16,8 @@ import { plainToClass } from 'class-transformer';
 import { EmployeeDTO } from './queries/get-employee/employee.dto';
 import { CreateEmployeeCommand } from './commands/create-employee/create-employee.command';
 import { UpdateEmployeeCommand } from './commands/update-employee/update-employee.command';
+import { AssignManagerDTO } from './commands/assign-manager/assign-manager.dto';
+import { AssignManagerCommand } from './commands/assign-manager/assign-manager.command';
 
 @Controller('employees')
 export class EmployeesController {
@@ -48,6 +51,23 @@ export class EmployeesController {
   @Patch(':id')
   async update(@Param('id') id: string, @Body() dto: UpdateEmployeeDto) {
     const command = plainToClass(UpdateEmployeeCommand, {
+      ...dto,
+      id: Number(id),
+    });
+
+    const affectedRows: number = await this.commandBus.execute(command);
+
+    if (!affectedRows) throw new NotFoundException();
+
+    const query = plainToClass(GetEmployeeQuery, { id });
+    const employeeId: number = await this.queryBus.execute(query);
+
+    return employeeId;
+  }
+
+  @Put(':id/assign-manager')
+  async assignManager(@Param('id') id: string, @Body() dto: AssignManagerDTO) {
+    const command = plainToClass(AssignManagerCommand, {
       ...dto,
       id: Number(id),
     });
